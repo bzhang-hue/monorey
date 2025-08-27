@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Monorey Tienda</title>
+
+  <!-- 网页标签上的小图标 favicon -->
+  <link rel="icon" type="image/png" href="https://i.postimg.cc/dVZgRVJG/logo-no-bg.png">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: #ff4400;
+      --primary-light: #ff6a21;
+      --price-color: #e60012;
+    }
+    body { background: #fffaf5; font-family: "Segoe UI","PingFang SC",sans-serif; }
+    header { background: linear-gradient(to right,#ff4400,#ff6a21); color: white; }
+    .btn-primary { background: var(--primary); color:white; font-weight:600; transition:.2s; }
+    .btn-primary:hover { background: var(--primary-light); transform:scale(1.05); }
+    .product-card { border:1px solid #f2f2f2; transition:.2s; }
+    .product-card:hover { transform: translateY(-5px); box-shadow:0 6px 18px rgba(0,0,0,.12); }
+  </style>
+</head>
+<body>
+
+
+ <header class="p-4 shadow sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+
+    <div class="flex items-center gap-2">
+     <img src="https://i.postimg.cc/dVZgRVJG/logo-no-bg.png"
+     alt="Monorey Logo"
+     class="h-14 w-auto rounded-lg">
+      <h1 class="text-2xl font-bold">Monorey Tienda</h1>
+    </div>
+
+    <div class="flex flex-1 max-w-xl">
+      <!-- ✅ 加上 oninput，实时搜索 -->
+      <input id="search-input" type="text" placeholder="Buscar productos..."
+        class="flex-1 px-3 py-2 rounded-l-lg text-gray-700 border border-gray-300"
+        oninput="searchProducts()" />
+      <button onclick="searchProducts()" class="px-4 py-2 rounded-r-lg btn-primary">Buscar</button>
+    </div>
+
+    <button onclick="toggleCart()" class="px-4 py-2 rounded-lg btn-primary">
+      🛒 Carrito (<span id="cart-count">0</span>)
+    </button>
+  </div>
+</header>
+
+  <div class="max-w-7xl mx-auto flex mt-6 gap-6 px-4">
+    <aside class="w-48 bg-white rounded-xl shadow p-4 h-fit sticky top-20">
+      <h2 class="font-bold text-lg mb-3">Categorías</h2>
+      <ul class="space-y-2 text-sm">
+        <li><a href="#Vasos" class="block px-3 py-1 rounded hover:bg-orange-100">🥤 Vasos</a></li>
+        <li><a href="#Esferas3D" class="block px-3 py-1 rounded hover:bg-orange-100">✨ Esferas 3D</a></li>
+        <li><a href="#Nuevaesferadecrista" class="block px-3 py-1 rounded hover:bg-orange-100">🆕 Nueva esfera</a></li>
+        <li><a href="#Lámparas" class="block px-3 py-1 rounded hover:bg-orange-100">💡 Lámparas</a></li>
+        <li><a href="#Planchas" class="block px-3 py-1 rounded hover:bg-orange-100">🔥 Planchas</a></li>
+        <li><a href="#Cocinar" class="block px-3 py-1 rounded hover:bg-orange-100">🍳 Cocinar</a></li>
+      </ul>
+    </aside>
+
+    
+    <main id="categories" class="flex-1 space-y-10"></main>
+  </div>
+
+  <!-- 🛒 购物车模态框 -->
+  <div id="cart-modal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg">
+      <h2 class="text-xl font-bold mb-4">🛒 Carrito de Compras</h2>
+      <div id="cart-items" class="space-y-3"></div>
+      <div class="mt-4 flex justify-between font-bold text-lg text-red-600">
+        <span>Total:</span>
+        <span id="cart-total">MX$0.00</span>
+      </div>
+      <div class="mt-4 flex gap-3">
+        <button onclick="checkout()" class="flex-1 py-2 rounded-lg btn-primary">Finalizar Pedido</button>
+        <button onclick="toggleCart()" class="flex-1 py-2 rounded-lg bg-gray-300 hover:bg-gray-400">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  
+  <footer class="text-center text-gray-700 mt-10 p-6 bg-orange-50 border-t-2 border-[var(--primary)]">
+    <p class="text-lg font-semibold">📞 Contacto</p>
+    <p>WhatsApp: <a href="https://wa.me/525568090809" target="_blank" class="text-green-600 font-bold">+52 556 809 0809</a></p>
+    <p>📍 Dirección: Izazaga 89 piso 3 / i373, piso 6 / n-647b</p>
+    <p class="mt-2 text-sm text-gray-500">© 2025 Monorey Tienda </p>
+  </footer>
+<script>
+let cart = [];
+const categories = [
+{ name: "Vasos", products: [
+    { id: 1, name: "Vaso 20oz", price: 95, img: "https://i.postimg.cc/wjrRJpXs/2025-08-25-202106.png" },
+    { id: 2, name: "Vaso 30oz", price: 100, img: "https://i.postimg.cc/HL5ny7Wf/2025-08-25-214310.png" },
+    { id: 3, name: "Vaso 600ml", price: 100, img: "https://i.postimg.cc/Znf5S8jy/2025-08-25-214424.png" },
+    { id: 4, name: "Vaso 500ml", price: 60, img: "https://i.postimg.cc/RVNMtnXX/2025-08-25-214527.png" },
+    { id: 5, name: "Vaso 30oz con Taza", price: 110, img: "https://i.postimg.cc/kGZPsffw/2025-08-25-214646.png" },
+    { id: 6, name: "Vaso 30oz Yeti", price: 120, img: "https://i.postimg.cc/MKjCx0s2/2025-08-25-214829.png" },
+    { id: 7, name: "Vaso 20oz Yeti con Taza", price: 120, img: "https://i.postimg.cc/WbLvdfqb/2025-08-25-215147.png" },
+    { id: 8, name: "Vaso 40oz Stanley con Taza", price: 210, img: "https://i.postimg.cc/c4NpxgPv/2025-08-25-215329.png" },
+    { id: 9, name: "Vaso 24oz con Taza ", price: 110, img: "https://i.postimg.cc/3YC6jwPZ/2025-08-25-215613.png" },
+    { id: 10, name: "Vaso 40oz", price: 160, img: "https://i.postimg.cc/D70gWyF0/2025-08-25-215847.png" },
+    { id: 11, name: "Vaso 500ml", price: 130, img: "https://i.postimg.cc/J0dHqVfg/2025-08-25-220039.png"},
+    { id: 13, name: "Vaso 20oz Yeti", price: 115, img: "https://i.postimg.cc/1tv8m13t/2025-08-25-220246.png" },
+    { id: 14, name: "Vaso 30oz Yeti", price: 120, img: "https://i.postimg.cc/c4pr4m0Q/2025-08-25-220406.png" },
+    { id: 15, name: "Vaso 12oz", price: 80, img: "https://i.postimg.cc/t4k9DXFk/2025-08-26-071312.png"},
+    { id: 16, name: "Vaso 1L", price: 140, img: "https://i.postimg.cc/8CjvRXxy/2025-08-26-071555.png"},
+    { id: 17, name: "Vaso 600ml", price: 90, img: "https://i.postimg.cc/Kvjm8XTs/2025-08-26-073902.png"},
+    { id: 18, name: "Taza de Cerámica con Calentador Inteligente Eléctrico", price: 140, img: "https://i.postimg.cc/X7RtStk5/2025-08-26-074221.png"}
+  ]},
+
+  { name: "Esferas 3D", products: [
+    { id: 19, name: "Esfera 3D 6cm", price: 50, img: "https://down-mx.img.susercontent.com/file/05b6ba67566a4962a5a35cc4be23322f" },
+    { id: 20, name: "Esfera 3D 6cm", price: 50, img: "https://m.media-amazon.com/images/I/71Lmu4+v9yL._AC_SL1500_.jpg" },
+    { id: 21, name: "Esfera 3D 6cm", price: 50, img: "https://mayoreo.vip/image/cache/catalog/LED796-600x600.jpg" },
+    { id: 22, name: "Esfera 3D 6cm", price: 50, img: "https://dcdn-us.mitiendanube.com/stores/005/236/253/products/luna-con-escalera2-d8616e094ec178f46917310101306608-1024-1024.jpg" },
+    { id: 23, name: "Esfera 3D 6cm", price: 50, img: "https://m.media-amazon.com/images/I/71yNPOf9oEL._AC_SL1500_.jpg" },
+    { id: 24, name: "Esfera 3D 6cm", price: 50, img: "https://m.media-amazon.com/images/I/61NeuFK7gQL._AC_SL1500_.jpg" },
+    { id: 25, name: "Esfera 3D 6cm", price: 50, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1lX5JZCmRMMLAfbOsgrJ8bN2b_cJRI-L7BNCt_TIxk5bi6Qr08EPVvcul3YtJN8g6h1E&usqp=CAU" },
+    { id: 26, name: "Esfera 3D 6cm", price: 50, img: "https://lampadamagica.pt/wp-content/uploads/2024/08/3-2-600x600.jpg" },
+    { id: 27, name: "Esfera 3D 6cm", price: 50, img: "https://http2.mlstatic.com/D_688331-CBT90103497707_082025-C.jpg" },
+    { id: 28, name: "Esfera 3D 6cm", price: 50, img: "https://tiendasaru.com/cdn/shop/files/IMG_8703.jpg?v=1728769072&width=1445" },
+    { id: 29, name: "Esfera 3D 6cm", price: 50, img: "https://http2.mlstatic.com/D_NQ_NP_769663-MLA87066908918_072025-O.webp" },
+    { id: 30, name: "Esfera 3D 6cm", price: 50, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSQ9qyKqSg2x-9XAHrCmMw0CvnGx3pZrbGsW_Zz0FgLljt5vsPS9xI7EIGtklhqgr5uec&usqp=CAU" },
+    { id: 31, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/MHN3w3gX/2025-08-26-080555.png" },
+    { id: 32, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/kg9zgzBt/2025-08-26-080751.png" },
+    { id: 33, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/hj9VvyJf/2025-08-26-081003.png" },
+    { id: 34, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/9QrTZFR3/2025-08-26-081124.png" },
+    { id: 35, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/85DjK15z/2025-08-26-081358.png" },
+    { id: 36, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/7YCYNCVN/2025-08-26-081516.png" },
+    { id: 37, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/CLHY7j8k/2025-08-26-082017.png" },
+    { id: 38, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/sxPFnrMs/2025-08-26-082153.png" },
+    { id: 39, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/wTV8L9Kk/2025-08-26-082251.png" },
+    { id: 40, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/FRcwR4g3/2025-08-26-082405.png" },
+    { id: 41, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/mrZ549tx/2025-08-26-085045.png" },
+    { id: 42, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/mZ16TB2r/2025-08-26-085142.png" },
+    { id: 43, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/hjP74Dq3/2025-08-26-083335.png" },
+    { id: 44, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/t4BzhMCf/2025-08-26-085448.png" },
+    { id: 45, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/PrkvNQhw/2025-08-26-083748.png" },
+    { id: 46, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/rFczqyCG/2025-08-26-083853.png" },
+    { id: 47, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/cHSGfCJX/2025-08-26-084331.png" },
+    { id: 48, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/dt1P2zqP/2025-08-26-084432.png" },
+    { id: 49, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/J0zgQkCc/2025-08-26-084605.png" },
+    { id: 50, name: "Esfera 3D 8cm", price: 80, img: "https://i.postimg.cc/y6fQhxQn/2025-08-26-093348.png" },
+    { id: 51, name: "Esfera 3D 8cm", price: 80, img: "https://i.postimg.cc/0Qjm9kY2/2025-08-26-093630.png" },
+    { id: 52, name: "Esfera 3D 8cm", price: 80, img: "https://i.postimg.cc/QdDfh7H8/2025-08-26-093741.png" },
+    { id: 53, name: "Esfera 3D 8cm", price: 80, img: "https://i.postimg.cc/vB4z3LSz/2025-08-26-093835.png" },
+    { id: 54, name: "Esfera 3D 8cm", price: 80, img: "https://i.postimg.cc/4Nk5Qcv6/2025-08-26-093934.png" },
+    { id: 55, name: "Esfera 3D 8cm", price: 80, img: "https://i.postimg.cc/38q9WVdb/2025-08-26-094030.png" }
+  ]},
+
+  { name: "Nueva esfera de crista", products: [
+    { id: 56, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/c1cTxCG0/2025-08-26-091238.png" },
+    { id: 57, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/d30CtqGV/2025-08-26-091722.png" },
+    { id: 58, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/R0QJ73R0/2025-08-26-091911.png" },
+    { id: 59, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/FzqYr09T/2025-08-26-092037.png" },
+    { id: 60, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/QNR5rrHh/2025-08-26-092248.png" },
+    { id: 61, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/KzCKFncJ/2025-08-26-092401.png" },
+    { id: 62, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/ZK89tBGx/2025-08-26-092516.png" },
+    { id: 63, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/yNdWZfkL/2025-08-26-092609.png" },
+    { id: 64, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/TYJPH8bk/2025-08-26-092743.png" },
+    { id: 65, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/0jd93mz6/2025-08-26-092910.png" },
+    { id: 66, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/RZb4jvZT/2025-08-26-092955.png" },
+    { id: 67, name: "Esfera 3D 6cm", price: 50, img: "https://i.postimg.cc/44bZX63y/2025-08-26-093055.png" }
+  ]},
+
+  { name: "Lámparas", products: [
+    { id: 68, name: "Lámpara de Árbol", price: 160, img: "https://i.postimg.cc/D0Bw0Ln9/2025-08-26-094307.png" },
+    { id: 69, name: "Lámpara de Árbol", price: 160, img: "https://i.postimg.cc/MZPwcWyJ/2025-08-26-094521.png" },
+    { id: 70, name: "Lámpara de Árbol", price: 160, img: "https://i.postimg.cc/4N7Dmpfp/2025-08-26-094640.png" },
+    { id: 71, name: "Lámpara de Árbol", price: 140, img: "https://i.postimg.cc/sXg8yhHQ/2025-08-26-094731.png" },
+    { id: 72, name: "Lámpara de Árbol", price: 140, img: "https://i.postimg.cc/6qRF1N1Y/2025-08-26-094829.png" },
+    { id: 73, name: "Lámpara de Árbol", price: 490, img: "https://i.postimg.cc/hvjf9pyD/2025-08-26-094933.png" }
+  ]},
+
+  { name: "Planchas", products: [
+    { id: 74, name: "Plancha", price: 160, img: "https://i.postimg.cc/tgB17KkS/2025-08-26-095100.png" },
+    { id: 75, name: "Plancha", price: 160, img: "https://i.postimg.cc/QxgpkxqV/2025-08-26-095156.png" },
+    { id: 76, name: "Plancha", price: 160, img: "https://i.postimg.cc/7hnf7byk/2025-08-26-095308.png" },
+    { id: 77, name: "Plancha", price: 110, img: "https://i.postimg.cc/9F1DQ4pP/2025-08-26-095343.png" },
+    { id: 78, name: "Plancha", price: 240, img: "https://i.postimg.cc/NM1MqLFH/2025-08-26-095429.png" },
+    { id: 79, name: "Plancha", price: 150, img: "https://i.postimg.cc/8CvkMsh0/2025-08-26-095603.png" },
+    { id: 80, name: "Plancha", price: 90, img: "https://i.postimg.cc/9MtWgSgP/2025-08-26-095619.png" },
+    { id: 81, name: "Plancha", price: 210, img: "https://i.postimg.cc/3RLqwFk5/2025-08-26-095759.png" }
+  ]}
+  ,   
+  { 
+    name: "Cocinar", 
+    products: [
+      { id: 82, name: "batidora eléctrica de mano", price: 140, img: "https://i.postimg.cc/5t65QX1M/2025-08-26-155201.png" },
+      { id: 83, name: "Cortador De Verduras", price: 100, img: "https://i.postimg.cc/T1XnsQbR/2025-08-26-155400.png" },
+      { id: 84, name: "Mini Wafflera Eléctrica En Forma De Corazón", price: 160, img: "https://i.postimg.cc/W1tqXxyG/2025-08-26-155558.png" },
+      { id: 85, name: "chocolatera eléctrica", price: 200, img: "https://i.postimg.cc/x8xTm1nW/2025-08-26-155752.png" },
+      { id: 86, name: "Taza medidora digital con escala", price: 150, img: "https://i.postimg.cc/NMbghj95/2025-08-26-155930.png" },
+      { id: 87, name: "estufa de gas portátil", price: 290, img: "https://i.postimg.cc/j2LYGQYF/2025-08-26-160112.png" },
+      { id: 88, name: "Mini Molino Moledor De Café", price: 130, img: "https://i.postimg.cc/ht86Z37G/2025-08-26-160330.png" },
+      { id: 89, name: "Sartén Eléctrico Plancha Multifuncional Cocina Yonsa", price: 140, img: "https://i.postimg.cc/05T9LFrG/2025-08-26-160509.png" },
+      { id: 90, name: "Mini Mopa Portátil Plegable Multiuso Hogar", price: 40, img: "https://i.postimg.cc/GtdnpwD6/2025-08-26-160914.png" },
+      { id: 91, name: "Hielera Cubetera Cubeta Hielo Facil Ice Verano De Silicona", price: 90, img: "https://i.postimg.cc/DySBbpcN/2025-08-26-161145.png" },
+      { id: 92, name: "Afilador de cuchillos de cocina 4 en 1 XCF tecnología avanzada", price: 40, img: "https://i.postimg.cc/1t2KQTC6/2025-08-26-195829.png" },
+      { id: 93, name: "Mini Waflera Electrica Diseños Niños ", price: 270, img: "https://i.postimg.cc/7Pz3zKts/2025-08-26-200239.png" },
+      { id: 94, name: "Waffle Maker con cara sonriente y forma emoji para niños ", price: 270, img: "https://i.postimg.cc/8cGjMms9/2025-08-26-200455.png" },
+      { id: 95, name: "Sandwichera Dos Puestos Universal Royal ", price: 270, img: "https://i.postimg.cc/Qth3q4kQ/2025-08-26-200648.png" },
+      { id: 96, name: "Waflera eléctrica Genérica ", price: 160, img: "https://i.postimg.cc/hGn6FJzg/2025-08-26-200902.png" },
+      { id: 97, name: "Máquina Para Hacer Mini Donas Importada Negro ", price: 310, img: "https://i.postimg.cc/wxSdfjVx/2025-08-26-201116.png" },
+      { id: 98, name: "Maquina de chocolates ", price: 270, img: "https://i.postimg.cc/hjz5TVNL/2025-08-26-201328.png" },
+      { id: 99, name: "Soporte giratorio para cuchillos compartimentos separados ", price: 170, img: "https://i.postimg.cc/L6MbgYDP/2025-08-26-201428.png" },
+      { id: 100, name: "Jarra Eléctrica Plateada  ", price: 170, img: "https://i.postimg.cc/d1r9J6zx/2025-08-26-201607.png" },
+      { id: 101, name: "Calentador Hervidor De Agua Plegable Eléctrico Viaje 600ml ", price: 160, img: "https://i.postimg.cc/LXDnkZfs/2025-08-26-201905.png" },
+      { id: 102, name: "Bomba De Agua Universal Para Botellas ", price: 60, img: "https://i.postimg.cc/4ynNz2s8/2025-08-26-202139.png" },
+      { id: 103, name: "Cocina vegetal tallado fruta rebanador dispositivo Scoop Ballers Cutter Chop Gadgets ", price: 30, img: "https://i.postimg.cc/Ghybdy2s/2025-08-26-202411.png" },
+      { id: 104, name: "Cortador De Helicóptero De Vegetales Dicer 14-in-1 ", price: 160, img: "https://i.postimg.cc/PJZf3pvZ/2025-08-26-202628.png" },
+      { id: 105, name: "Especiero cristal 6 piezas giratoria 120ml", price: 180, img: "https://i.postimg.cc/SsP7L5cR/2025-08-26-205326.png" },
+      { id: 106, name: "Soporte giratorio para condimentos, 12 piezas, acero inoxidable ", price: 280, img: "https://i.postimg.cc/gJhqDssK/2025-08-26-205817.png" },
+      { id: 107, name: "Cuchara De Báscula Digital ", price:55 ,img: "https://i.postimg.cc/cL63hT48/2025-08-26-210104.png" },
+      { id: 108, name: "Licuadora Personal Portable Recargable Usb Jugos ", price: 100, img: "https://i.postimg.cc/2yc6BRW9/2025-08-26-210316.png" },
+      { id: 109, name: "Extractor de jugos Bpharm Inteligente Recargable blanco con accesorios ", price: 210, img: "https://i.postimg.cc/fyt456Fr/2025-08-26-210535.png" },
+      { id: 110, name: "3 Moldes Para Pastel ", price: 160, img: "https://i.postimg.cc/3RD5Fszb/2025-08-26-210808.png" },
+      { id: 111, name: "Estante De Almacenamiento De Macetas, Multicapa", price: 160, img: "https://i.postimg.cc/XYvP8MCc/2025-08-26-211004.png" },
+    ]
+  }
+];
+
+function renderCategories(filter=""){
+  const container=document.getElementById("categories");
+  container.innerHTML="";
+  categories.forEach(cat=>{
+    let filtered=cat.products.filter(p=>p.name.toLowerCase().includes(filter.toLowerCase()));
+    if(filtered.length===0)return;
+    let html=`<section id="${cat.name.replace(/\s+/g,'')}"><h2 class="text-xl font-bold mb-4">${cat.name}</h2><div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">`;
+    filtered.forEach(p=>{
+      html+=`
+      <div class="product-card bg-white rounded-xl shadow-sm p-4 flex flex-col">
+        <img src="${p.img}" class="rounded-lg mb-3 object-contain w-full max-h-60 mx-auto">
+        <h3 class="font-medium text-gray-800 truncate">${p.name}</h3>
+        <p class="text-lg font-bold text-[var(--price-color)]">MX$${p.price}</p>
+        <button onclick="addToCart(${p.id})" class="mt-auto py-2 rounded-lg btn-primary">🛒 Agregar</button>
+      </div>`
+    });
+    html+="</div></section>";
+    container.innerHTML+=html;
+  });
+}
+
+function addToCart(id){
+  const product=categories.flatMap(c=>c.products).find(p=>p.id===id);
+  const item=cart.find(i=>i.id===id);
+  if(item){item.qty++;}else{cart.push({...product,qty:1});}
+  updateCartCount();
+}
+function updateCartCount(){document.getElementById("cart-count").innerText=cart.reduce((s,i)=>s+i.qty,0);}
+function toggleCart(){document.getElementById("cart-modal").classList.toggle("hidden");renderCart();}
+function renderCart(){
+  const container=document.getElementById("cart-items");container.innerHTML="";
+  let total=0;
+  cart.forEach((i,idx)=>{total+=i.price*i.qty;
+    container.innerHTML+=`<div class='flex justify-between items-center border-b pb-2'>
+      <div><p class='font-medium'>${i.name}</p><p class='text-sm text-gray-500'>MX$${i.price} × ${i.qty}</p></div>
+      <div class='flex gap-2'>
+        <button onclick='changeQty(${idx},-1)' class='px-2 bg-gray-200 rounded'>-</button>
+        <button onclick='changeQty(${idx},1)' class='px-2 bg-gray-200 rounded'>+</button>
+        <button onclick='removeItem(${idx})' class='px-2 bg-red-500 text-white rounded'>X</button>
+      </div>
+    </div>`});
+  document.getElementById("cart-total").innerText="MX$"+total.toFixed(2);
+}
+function changeQty(idx,delta){cart[idx].qty+=delta;if(cart[idx].qty<=0)cart.splice(idx,1);updateCartCount();renderCart();}
+function removeItem(idx){cart.splice(idx,1);updateCartCount();renderCart();}
+function checkout(){if(cart.length===0)return alert("El carrito está vacío");alert("Por favor, contacte al vendedor para realizar la compra.");cart=[];updateCartCount();toggleCart();}
+function searchProducts(){const val=document.getElementById("search-input").value;renderCategories(val);}
+
+window.onload=()=>{renderCategories();}
+</script>
+</body>
+</html>
